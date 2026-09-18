@@ -1,3 +1,5 @@
+![Flick](Resources/brand/banner.jpg)
+
 # Flick
 
 A small native launcher for macOS. **Option+Space** opens a dark HUD. Type, pick, return.
@@ -14,7 +16,7 @@ Esc, Option+Space, ⌘W, click outside, or the × in the field.
 make install
 ```
 
-Copies `Flick.app` to `/Applications` and launches it. No Dock icon — look for the magnifying glass in the menu bar. Quit from there.
+Copies `Flick.app` to `/Applications` and launches it. No Dock icon — look for the Flick mark in the menu bar. Quit from there.
 
 Requires macOS 14+ and the Swift toolchain (Command Line Tools is enough).
 

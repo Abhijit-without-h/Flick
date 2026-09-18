@@ -24,6 +24,10 @@ rm -rf "${APP}"
 mkdir -p "${APP}/Contents/MacOS" "${APP}/Contents/Resources"
 cp "$BIN" "${APP}/Contents/MacOS/Flick"
 cp "${ROOT}/Resources/Info.plist" "${APP}/Contents/Info.plist"
+[[ -f "${ROOT}/Resources/AppIcon.icns" ]] || die "missing Resources/AppIcon.icns (run Scripts/build-icons.sh)"
+cp "${ROOT}/Resources/AppIcon.icns" "${APP}/Contents/Resources/AppIcon.icns"
+cp "${ROOT}/Resources/MenuBarIcon.png" "${APP}/Contents/Resources/MenuBarIcon.png"
+cp "${ROOT}/Resources/MenuBarIcon@2x.png" "${APP}/Contents/Resources/MenuBarIcon@2x.png"
 printf 'APPLFLCK' > "${APP}/Contents/PkgInfo"
 
 if command -v codesign >/dev/null 2>&1; then

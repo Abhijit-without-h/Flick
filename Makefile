@@ -1,4 +1,7 @@
-.PHONY: build test app run install
+.PHONY: build test app run install icons
+
+icons:
+	bash Scripts/build-icons.sh
 
 build:
 	swift build

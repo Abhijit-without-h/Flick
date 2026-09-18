@@ -42,9 +42,16 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusItem() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = item.button {
-            button.image = NSImage(systemSymbolName: "sparkle.magnifyingglass", accessibilityDescription: "Flick")
-                ?? NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: "Flick")
-            button.image?.isTemplate = true
+            if let icon = Bundle.main.image(forResource: "MenuBarIcon") {
+                icon.size = NSSize(width: 18, height: 18)
+                icon.isTemplate = false
+                button.image = icon
+            } else {
+                button.image = NSImage(systemSymbolName: "sparkle.magnifyingglass", accessibilityDescription: "Flick")
+                    ?? NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: "Flick")
+                button.image?.isTemplate = true
+            }
+            button.toolTip = "Flick"
         }
         item.menu = buildMenu()
         statusItem = item
