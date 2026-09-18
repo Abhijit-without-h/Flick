@@ -28,7 +28,18 @@ iconutil -c icns "$ICONSET" -o "${ROOT}/Resources/AppIcon.icns"
 rm -rf "$ICONSET"
 cp "$BRAND/logo.png" "${ROOT}/Resources/AppIcon.png"
 
-magick "$BRAND/logo.png" -resize 22x22 "${ROOT}/Resources/MenuBarIcon.png"
-magick "$BRAND/logo.png" -resize 44x44 "${ROOT}/Resources/MenuBarIcon@2x.png"
+TRANSPARENT="${BRAND}/mark-transparent.png"
+if [[ -f "$TRANSPARENT" ]]; then
+  magick "$TRANSPARENT" -background none -gravity center -extent 1024x1024 \
+    -fill black -colorize 100 "${BRAND}/header-source.png"
+else
+  magick "$BRAND/logo-transparent.png" -background none -gravity center -extent 1024x1024 \
+    -fill black -colorize 100 "${BRAND}/header-source.png"
+fi
+magick "${BRAND}/header-source.png" -resize 18x18 "${ROOT}/Resources/MenuBarIcon.png"
+magick "${BRAND}/header-source.png" -resize 36x36 "${ROOT}/Resources/MenuBarIcon@2x.png"
+magick "${BRAND}/header-source.png" -resize 28x28 "${ROOT}/Resources/HeaderLogo.png"
+magick "${BRAND}/header-source.png" -resize 56x56 "${ROOT}/Resources/HeaderLogo@2x.png"
+rm -f "${BRAND}/header-source.png"
 
-echo "Wrote AppIcon.icns, logo.png, MenuBarIcon.png"
+echo "Wrote AppIcon.icns, logo.png, MenuBarIcon.png, HeaderLogo.png"

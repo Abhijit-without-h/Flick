@@ -13,9 +13,14 @@ final class SearchHeader: NSView, NSTextFieldDelegate {
         super.init(frame: frameRect)
         wantsLayer = true
 
-        icon.image = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: nil)
-        icon.contentTintColor = NSColor.white.withAlphaComponent(0.45)
-        icon.imageScaling = .scaleProportionallyDown
+        if let mark = BrandImages.template(named: "HeaderLogo", size: NSSize(width: 28, height: 28)) {
+            icon.image = mark
+            icon.contentTintColor = NSColor.white.withAlphaComponent(0.92)
+        } else {
+            icon.image = NSImage(systemSymbolName: "magnifyingglass", accessibilityDescription: nil)
+            icon.contentTintColor = NSColor.white.withAlphaComponent(0.45)
+        }
+        icon.imageScaling = .scaleProportionallyUpOrDown
         icon.translatesAutoresizingMaskIntoConstraints = false
 
         field.isBordered = false
@@ -53,8 +58,8 @@ final class SearchHeader: NSView, NSTextFieldDelegate {
             heightAnchor.constraint(equalToConstant: 52),
             icon.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             icon.centerYAnchor.constraint(equalTo: centerYAnchor),
-            icon.widthAnchor.constraint(equalToConstant: 18),
-            icon.heightAnchor.constraint(equalToConstant: 18),
+            icon.widthAnchor.constraint(equalToConstant: 28),
+            icon.heightAnchor.constraint(equalToConstant: 28),
             field.leadingAnchor.constraint(equalTo: icon.trailingAnchor, constant: 10),
             field.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -8),
             field.centerYAnchor.constraint(equalTo: centerYAnchor),

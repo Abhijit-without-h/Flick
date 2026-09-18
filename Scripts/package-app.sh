@@ -28,6 +28,8 @@ cp "${ROOT}/Resources/Info.plist" "${APP}/Contents/Info.plist"
 cp "${ROOT}/Resources/AppIcon.icns" "${APP}/Contents/Resources/AppIcon.icns"
 cp "${ROOT}/Resources/MenuBarIcon.png" "${APP}/Contents/Resources/MenuBarIcon.png"
 cp "${ROOT}/Resources/MenuBarIcon@2x.png" "${APP}/Contents/Resources/MenuBarIcon@2x.png"
+cp "${ROOT}/Resources/HeaderLogo.png" "${APP}/Contents/Resources/HeaderLogo.png"
+cp "${ROOT}/Resources/HeaderLogo@2x.png" "${APP}/Contents/Resources/HeaderLogo@2x.png"
 printf 'APPLFLCK' > "${APP}/Contents/PkgInfo"
 
 if command -v codesign >/dev/null 2>&1; then
