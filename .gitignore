@@ -32,3 +32,4 @@ Resources/AppIcon.iconset/
 skills-lock.json
 web/node_modules/
 web/dist/
+brag-output-*/composition/node_modules/
