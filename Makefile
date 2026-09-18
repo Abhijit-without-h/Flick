@@ -1,4 +1,4 @@
-.PHONY: build test app run install icons
+.PHONY: build test app run install icons dist
 
 icons:
 	bash Scripts/build-icons.sh
@@ -19,3 +19,6 @@ install: app
 	rm -rf /Applications/Flick.app
 	cp -R dist/Flick.app /Applications/Flick.app
 	open /Applications/Flick.app
+
+dist:
+	bash Scripts/make-dist.sh
