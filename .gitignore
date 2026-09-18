@@ -1,0 +1,27 @@
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+
+# Bundled app
+dist/
+
+# Xcode
+DerivedData/
+xcuserdata/
+*.xcodeproj
+*.xcworkspace
+*.xcuserstate
+
+# Brainstorm / local
+.superpowers/
+
+# OS / editor
+.DS_Store
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+.env
+.env.*
