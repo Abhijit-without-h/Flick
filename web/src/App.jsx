@@ -15,6 +15,21 @@ const KEYS = [
   { chord: 'Esc', action: 'Dismiss' },
 ]
 
+const VERSUS = [
+  { native: 'Spins a window', flick: 'Panel already exists' },
+  { native: 'Whole-disk Spotlight index', flick: 'RAM catalog. Apps first.' },
+  { native: 'Web hits, Siri, mail, junk', flick: 'Apps, three folders, commands' },
+  { native: 'Ranks whatever mdquery returns', flick: 'Fuzzy + what you actually open' },
+  { native: '⌘ Space, same as everyone', flick: '⌥ Space. Spotlight stays.' },
+]
+
+const SPEEDS = [
+  { n: '<16 ms', d: 'Hotkey to first pixel. The HUD is pre-created, hidden, then ordered in.' },
+  { n: '~2 ms', d: 'Warm app recatalog. Cold scan of Applications is under 100 ms, then cached.' },
+  { n: '~17 ms', d: 'Desktop, Documents, Downloads indexed in the background. Apps are already searchable.' },
+  { n: '0 %', d: 'Idle CPU after launch. Clipboard watch is a quiet timer, not a Spotlight daemon.' },
+]
+
 export default function App() {
   useEffect(() => {
     registerEffects()
@@ -29,6 +44,14 @@ export default function App() {
     })
     ScrollTrigger.batch('.key-row', {
       onEnter: batch => gsap.effects.press(batch, { stagger: 0.05 }),
+      once: true,
+    })
+    ScrollTrigger.batch('.speed-cell', {
+      onEnter: batch => gsap.effects.rise(batch, { stagger: 0.05 }),
+      once: true,
+    })
+    ScrollTrigger.batch('.vs-row', {
+      onEnter: batch => gsap.effects.press(batch, { stagger: 0.04 }),
       once: true,
     })
     ScrollTrigger.batch('.dl-block', {
@@ -47,6 +70,9 @@ export default function App() {
             <span className="font-mono text-[0.7rem] uppercase tracking-[0.28em]">Flick</span>
           </a>
           <div className="flex items-center gap-6">
+            <a href="#versus" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[var(--ink)] no-underline md:inline">
+              Versus
+            </a>
             <a href="#brag" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[var(--ink)] no-underline md:inline">
               Reel
             </a>
@@ -69,8 +95,8 @@ export default function App() {
               <h1 className="hero-stamp display mb-4 max-w-3xl text-[clamp(3.4rem,11vw,8.5rem)] leading-[0.86] font-semibold tracking-[-0.03em] text-[var(--ink)]">
                 Option+Space.
               </h1>
-              <p className="hero-stamp mb-8 max-w-md font-mono text-sm leading-relaxed text-[var(--muted)]">
-                A native launcher for Mac. Move the cursor to develop the print. Apps, files, commands — no Spotlight index.
+              <p className="hero-stamp mb-8 max-w-lg font-mono text-sm leading-relaxed text-[var(--muted)]">
+                Faster than Spotlight because it does less. The panel is already in memory. Move the cursor to develop the print.
               </p>
               <div className="hero-stamp pointer-events-auto flex flex-wrap gap-3">
                 <Button asChild size="lg">
@@ -83,6 +109,38 @@ export default function App() {
                   <a href="#proof">How it works</a>
                 </Button>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="versus" className="border-t border-[var(--rule)]">
+          <div className="mx-auto max-w-6xl px-5 py-20 md:px-8">
+            <p className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-[var(--muted)]">⌘ Space vs ⌥ Space</p>
+            <h2 className="display mb-4 max-w-3xl text-5xl font-semibold tracking-tight md:text-7xl">Spotlight searches the Mac. Flick searches what you launch.</h2>
+            <p className="mb-14 max-w-xl text-sm leading-relaxed text-[var(--muted)]">
+              Native search is a disk-wide index plus suggestions. Flick is a resident HUD over a tiny catalog. That is why it feels instant.
+            </p>
+            <div className="mb-4 hidden grid-cols-2 gap-8 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-[var(--muted)] md:grid">
+              <span>Spotlight</span>
+              <span>Flick</span>
+            </div>
+            <ul className="divide-y divide-[var(--rule)] border-y border-[var(--rule)]">
+              {VERSUS.map(row => (
+                <li key={row.native} className="vs-row grid gap-2 py-5 md:grid-cols-2 md:gap-8">
+                  <span className="text-sm text-[var(--muted)] line-through decoration-[var(--rule)] md:text-base">{row.native}</span>
+                  <span className="display text-2xl leading-tight md:text-3xl">{row.flick}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="border-t border-[var(--rule)]">
+            <div className="mx-auto grid max-w-6xl md:grid-cols-4">
+              {SPEEDS.map(item => (
+                <article key={item.n} className="speed-cell border-b border-[var(--rule)] px-5 py-10 md:border-r md:border-b-0 md:px-8 last:md:border-r-0">
+                  <p className="display mb-3 text-4xl font-semibold tracking-tight md:text-5xl">{item.n}</p>
+                  <p className="text-sm leading-relaxed text-[var(--muted)]">{item.d}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
