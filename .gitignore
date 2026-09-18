@@ -27,3 +27,6 @@ Resources/AppIcon.iconset/
 .vscode/
 .env
 .env.*
+
+.grok/
+skills-lock.json
