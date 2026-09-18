@@ -30,6 +30,14 @@ make install
 
 Requires the Swift toolchain (Command Line Tools is enough). `make dist` writes `dist/Flick-<version>.dmg` and `.zip`.
 
+## Site
+
+Print-studio landing with a HalftoneReveal hero:
+
+```bash
+cd web && npm install && npm run dev
+```
+
 ## Build
 
 ```bash
@@ -48,11 +56,14 @@ make test     # core tests
 | `example.com` | Open the URL |
 | `quit` | Quit a running app |
 | `sleep` | Sleep the Mac |
+| `put this mac to sleep` | Sleep, via TypeSafe when a key is set |
 
 Also: Empty Trash, Lock Screen, Dark Mode, Kill, clipboard history (last 20 strings; password-manager secrets are skipped).
 
 ↓↑ to move, ↩ to run, ⌘↩ to reveal in Finder, ⌘K for actions on the selected row.
 
 Rebind the hotkey from the menu bar extra if Option+Space is taken.
+
+Multi-word commands (`quit safari`, `empty the trash`, `turn on dark mode`) can be routed by [TypeSafe](https://docs.typesafe.ai) (Jev). Fuzzy search still runs immediately; a confident command is promoted to the top of the list. Enter still runs it — nothing executes on its own. Set `TYPESAFE_API_KEY` or paste a key from the menu bar extra. Without a key, Flick is unchanged.
 
 Internals: [docs/design.md](docs/design.md).

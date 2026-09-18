@@ -30,3 +30,5 @@ Resources/AppIcon.iconset/
 
 .grok/
 skills-lock.json
+web/node_modules/
+web/dist/
