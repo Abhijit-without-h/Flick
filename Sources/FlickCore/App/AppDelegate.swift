@@ -12,11 +12,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
     public func applicationDidFinishLaunching(_ notification: Notification) {
         let catalog = Catalog(store: store)
         self.catalog = catalog
-        catalog.start()
 
         let state = OverlayState(catalog: catalog, store: store)
         let overlay = OverlayController(state: state)
         self.overlay = overlay
+        catalog.start()
 
         setupStatusItem()
         setupHotKey()
@@ -26,10 +26,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        let prefs = store.loadPrefs()
-        if prefs.loginItemEnabled {
-            _ = LoginItem.setEnabled(true)
-        }
+        var prefs = store.loadPrefs()
+        prefs.loginItemEnabled = LoginItem.isEnabled
+        store.savePrefs(prefs)
     }
 
     public func applicationDidResignActive(_ notification: Notification) {

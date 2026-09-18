@@ -25,9 +25,7 @@ public final class FileWatcher {
             release: nil,
             copyDescription: nil
         )
-        let flags = FSEventStreamCreateFlags(
-            kFSEventStreamCreateFlagUseCFTypes | kFSEventStreamCreateFlagFileEvents
-        )
+        let flags = FSEventStreamCreateFlags(kFSEventStreamCreateFlagUseCFTypes)
         guard let stream = FSEventStreamCreate(
             nil,
             { _, info, _, _, _, _ in
@@ -38,7 +36,7 @@ public final class FileWatcher {
             &context,
             existing as CFArray,
             FSEventStreamEventId(kFSEventStreamEventIdSinceNow),
-            0.4,
+            1.0,
             flags
         ) else { return }
 
@@ -62,6 +60,6 @@ public final class FileWatcher {
             DispatchQueue.main.async { self?.onChanged?() }
         }
         debounce = work
-        queue.asyncAfter(deadline: .now() + 0.4, execute: work)
+        queue.asyncAfter(deadline: .now() + 1.0, execute: work)
     }
 }

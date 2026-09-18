@@ -53,10 +53,11 @@ public final class ClipboardSource {
 
     private func ingest(_ board: NSPasteboard) {
         let types = (board.types ?? []).map(\.rawValue)
-        if PasteboardPrivacy.isConcealed(types: types) { return }
+        if PasteboardPrivacy.shouldSkip(types: types) { return }
         guard let string = board.string(forType: .string)?
             .trimmingCharacters(in: .whitespacesAndNewlines),
-            !string.isEmpty
+            !string.isEmpty,
+            string.utf8.count <= 16_384
         else { return }
         items.removeAll { $0 == string }
         items.insert(string, at: 0)

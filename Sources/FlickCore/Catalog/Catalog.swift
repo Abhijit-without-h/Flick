@@ -41,15 +41,16 @@ public final class Catalog {
                         keywords: [$0.name]
                     )
                 },
-                files: cache.files.map {
-                    Item(
-                        id: $0.path,
+                files: cache.files.compactMap { cached -> Item? in
+                    guard FileSource.isAllowed(path: cached.path) else { return nil }
+                    return Item(
+                        id: cached.path,
                         kind: .file,
-                        title: $0.name,
-                        subtitle: $0.path,
-                        path: $0.path,
-                        keywords: [$0.name],
-                        mtime: $0.mtime
+                        title: cached.name,
+                        subtitle: cached.path,
+                        path: cached.path,
+                        keywords: [cached.name],
+                        mtime: cached.mtime
                     )
                 },
                 commands: CommandSource.staticCommands() + CommandSource.runningAppCommands(),
@@ -77,12 +78,12 @@ public final class Catalog {
         refreshAll()
     }
 
+    /// Updates Quit/Kill rows. Does not call `onUpdate` (OverlayState.refresh would recurse).
     public func refreshRunning() {
         var next = snapshot
         let statics = CommandSource.staticCommands()
         next.commands = statics + CommandSource.runningAppCommands()
         snapshot = next
-        onUpdate?()
     }
 
     public func search(query: String, usage: [String: UsageEntry]) -> [ResultGroup] {
@@ -102,8 +103,8 @@ public final class Catalog {
             let files = FileSource.scan()
             DispatchQueue.main.async {
                 self.snapshot.files = files
-                self.persist()
                 self.onUpdate?()
+                self.persistAsync()
             }
         }
     }
@@ -112,20 +113,28 @@ public final class Catalog {
         io.async { [weak self] in
             guard let self else { return }
             let apps = AppSource.scan()
-            let files = FileSource.scan()
-            let commands = CommandSource.staticCommands() + CommandSource.runningAppCommands()
             DispatchQueue.main.async {
                 self.snapshot.apps = apps
-                self.snapshot.files = files
-                self.snapshot.commands = commands
-                self.snapshot.clipboard = self.clipboard.catalogItems()
-                self.persist()
                 self.onUpdate?()
+                self.persistAsync()
+            }
+            let files = FileSource.scan()
+            DispatchQueue.main.async {
+                self.snapshot.files = files
+                self.onUpdate?()
+                self.persistAsync()
             }
         }
     }
 
-    private func persist() {
+    private func persistAsync() {
+        let snapshot = self.snapshot
+        io.async { [weak self] in
+            self?.persist(snapshot)
+        }
+    }
+
+    private func persist(_ snapshot: CatalogSnapshot) {
         let cache = CatalogCache(
             apps: snapshot.apps.compactMap { item in
                 guard let path = item.path else { return nil }

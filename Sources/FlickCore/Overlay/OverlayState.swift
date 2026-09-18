@@ -2,6 +2,17 @@ import AppKit
 import Combine
 import Foundation
 
+public enum ProcessQuery {
+    /// Refresh running apps when the overlay opens or the query is quit/kill-like.
+    public static func needsRunningApps(_ raw: String) -> Bool {
+        let q = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return false }
+        if q.contains("quit") || q.contains("kill") { return true }
+        if "quit".hasPrefix(q) || "kill".hasPrefix(q) { return true }
+        return false
+    }
+}
+
 @MainActor
 public final class OverlayState: ObservableObject {
     @Published public var query = ""
@@ -19,6 +30,11 @@ public final class OverlayState: ObservableObject {
     public init(catalog: Catalog, store: Store) {
         self.catalog = catalog
         self.store = store
+        catalog.onUpdate = { [weak self] in
+            DispatchQueue.main.async {
+                self?.refresh()
+            }
+        }
         refresh()
     }
 
@@ -32,8 +48,8 @@ public final class OverlayState: ObservableObject {
         return items[selectedIndex]
     }
 
+    /// Search only. Does not scan running apps or re-read usage.json.
     public func refresh() {
-        catalog.refreshRunning()
         groups = catalog.search(query: query, usage: store.loadUsage())
         if selectedIndex >= flatItems.count {
             selectedIndex = max(0, flatItems.count - 1)
@@ -41,10 +57,19 @@ public final class OverlayState: ObservableObject {
         error = nil
     }
 
+    /// Called when the HUD opens: refresh Quit/Kill rows, then search.
+    public func refreshForShow() {
+        catalog.refreshRunning()
+        refresh()
+    }
+
     public func queryChanged(_ value: String) {
         query = value
         showingActions = false
         selectedIndex = 0
+        if ProcessQuery.needsRunningApps(value) {
+            catalog.refreshRunning()
+        }
         refresh()
     }
 

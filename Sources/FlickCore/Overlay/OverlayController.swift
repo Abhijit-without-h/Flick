@@ -1,5 +1,4 @@
 import AppKit
-import SwiftUI
 
 final class HUDPanel: NSPanel {
     override var canBecomeKey: Bool { true }
@@ -50,7 +49,7 @@ public final class OverlayController: NSObject {
         state.error = nil
         state.selectedIndex = 0
         searchHeader?.field.stringValue = ""
-        state.refresh()
+        state.refreshForShow()
         position()
         // Stay `.regular` while the HUD is up so it can be key: Esc, click-outside,
         // and Option+Space then dismiss instead of inserting a non-breaking space.
@@ -117,10 +116,10 @@ public final class OverlayController: NSObject {
         }
         searchHeader = header
 
-        let hosting = NSHostingView(rootView: OverlayView(state: state, onDismiss: { [weak self] in
+        let results = ResultsPane(state: state, onDismiss: { [weak self] in
             self?.hide()
-        }))
-        hosting.wantsLayer = true
+        })
+        results.wantsLayer = true
 
         let divider = NSView()
         divider.wantsLayer = true
@@ -128,13 +127,13 @@ public final class OverlayController: NSObject {
         divider.translatesAutoresizingMaskIntoConstraints = false
         divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
 
-        let stack = NSStackView(views: [header, divider, hosting])
+        let stack = NSStackView(views: [header, divider, results])
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = 0
         stack.translatesAutoresizingMaskIntoConstraints = false
         header.translatesAutoresizingMaskIntoConstraints = false
-        hosting.translatesAutoresizingMaskIntoConstraints = false
+        results.translatesAutoresizingMaskIntoConstraints = false
 
         effect.addSubview(stack)
         NSLayoutConstraint.activate([
@@ -144,8 +143,8 @@ public final class OverlayController: NSObject {
             stack.bottomAnchor.constraint(equalTo: effect.bottomAnchor),
             header.widthAnchor.constraint(equalTo: stack.widthAnchor),
             divider.widthAnchor.constraint(equalTo: stack.widthAnchor),
-            hosting.widthAnchor.constraint(equalTo: stack.widthAnchor),
-            hosting.heightAnchor.constraint(greaterThanOrEqualToConstant: 280),
+            results.widthAnchor.constraint(equalTo: stack.widthAnchor),
+            results.heightAnchor.constraint(greaterThanOrEqualToConstant: 280),
         ])
 
         panel.contentView = effect

@@ -1,63 +1,88 @@
-import AppKit
 import Foundation
 
 public enum AppSource {
-    public static let searchRoots: [URL] = [
-        URL(fileURLWithPath: "/Applications", isDirectory: true),
-        URL(fileURLWithPath: "/System/Applications", isDirectory: true),
-        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true),
-    ]
+    public static let searchRoots: [URL] = {
+        var roots = [
+            URL(fileURLWithPath: "/Applications", isDirectory: true),
+            URL(fileURLWithPath: "/System/Applications", isDirectory: true),
+            FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications", isDirectory: true),
+        ]
+        let cryptex = URL(fileURLWithPath: "/System/Cryptexes/App/System/Applications", isDirectory: true)
+        if FileManager.default.fileExists(atPath: cryptex.path) {
+            roots.append(cryptex)
+        }
+        return roots
+    }()
 
-    public static func scan() -> [Item] {
+    public static func scan(roots: [URL] = searchRoots) -> [Item] {
         var items: [Item] = []
         var seen = Set<String>()
         let fm = FileManager.default
-        let workspace = NSWorkspace.shared
 
-        for root in searchRoots {
-            guard let names = try? fm.contentsOfDirectory(atPath: root.path) else { continue }
-            for name in names where name.hasSuffix(".app") {
-                let url = root.appendingPathComponent(name)
-                let path = url.path
-                guard !seen.contains(path) else { continue }
-                seen.insert(path)
-                let bundle = Bundle(url: url)
-                let display = workspace.localizedName(forApplicationAt: url)
-                    ?? bundle?.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
-                    ?? bundle?.object(forInfoDictionaryKey: "CFBundleName") as? String
-                    ?? (name as NSString).deletingPathExtension
-                let bid = bundle?.bundleIdentifier
-                items.append(
-                    Item(
-                        id: bid ?? path,
-                        kind: .app,
-                        title: display,
-                        subtitle: path,
-                        path: path,
-                        bundleIdentifier: bid,
-                        keywords: [display, (name as NSString).deletingPathExtension]
-                    )
-                )
+        for root in roots {
+            guard let entries = try? fm.contentsOfDirectory(
+                at: root,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: [.skipsHiddenFiles]
+            ) else { continue }
+
+            for url in entries {
+                if url.pathExtension == "app" {
+                    if let item = item(at: url, seen: &seen) {
+                        items.append(item)
+                    }
+                    continue
+                }
+                var isDir: ObjCBool = false
+                guard fm.fileExists(atPath: url.path, isDirectory: &isDir), isDir.boolValue else { continue }
+                // One extra level for folders like Utilities.
+                guard let nested = try? fm.contentsOfDirectory(
+                    at: url,
+                    includingPropertiesForKeys: nil,
+                    options: [.skipsHiddenFiles]
+                ) else { continue }
+                for child in nested where child.pathExtension == "app" {
+                    if let item = item(at: child, seen: &seen) {
+                        items.append(item)
+                    }
+                }
             }
         }
         return items.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
     }
-}
 
-private extension NSWorkspace {
-    func localizedName(forApplicationAt url: URL) -> String? {
-        if let name = url.deletingPathExtension().lastPathComponent as String? {
-            // Prefer Info.plist display name when present.
-            if let bundle = Bundle(url: url) {
-                if let display = bundle.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String, !display.isEmpty {
-                    return display
-                }
-                if let bundleName = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String, !bundleName.isEmpty {
-                    return bundleName
-                }
-            }
-            return name
-        }
-        return nil
+    private static func item(at url: URL, seen: inout Set<String>) -> Item? {
+        let resolved = url.resolvingSymlinksInPath()
+        let path = resolved.path
+        guard !seen.contains(path) else { return nil }
+        seen.insert(path)
+
+        let fallback = (url.lastPathComponent as NSString).deletingPathExtension
+        let info = infoDictionary(atApp: resolved) ?? infoDictionary(atApp: url)
+        let display = nonEmpty(info?["CFBundleDisplayName"] as? String)
+            ?? nonEmpty(info?["CFBundleName"] as? String)
+            ?? fallback
+        let bid = nonEmpty(info?["CFBundleIdentifier"] as? String)
+        return Item(
+            id: bid ?? path,
+            kind: .app,
+            title: display,
+            subtitle: path,
+            path: path,
+            bundleIdentifier: bid,
+            keywords: [display, fallback]
+        )
+    }
+
+    /// Faster than `Bundle(url:)` — reads Contents/Info.plist only. Icons stay lazy.
+    private static func infoDictionary(atApp url: URL) -> [String: Any]? {
+        let infoURL = url.appendingPathComponent("Contents/Info.plist")
+        guard let data = try? Data(contentsOf: infoURL, options: [.mappedIfSafe]) else { return nil }
+        return try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: Any]
+    }
+
+    private static func nonEmpty(_ value: String?) -> String? {
+        guard let value, !value.isEmpty else { return nil }
+        return value
     }
 }

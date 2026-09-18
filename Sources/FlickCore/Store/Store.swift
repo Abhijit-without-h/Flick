@@ -8,7 +8,7 @@ public struct Prefs: Codable, Equatable {
     public static let optionSpace: Prefs = .init(
         keyCode: 49,          // kVK_Space
         modifiers: 2048,      // optionKey
-        loginItemEnabled: true
+        loginItemEnabled: false
     )
 
     public init(keyCode: UInt32, modifiers: UInt32, loginItemEnabled: Bool) {
@@ -64,6 +64,7 @@ public struct CatalogCache: Codable, Equatable {
 
 public final class Store {
     public let root: URL
+    private var usageCache: [String: UsageEntry]?
 
     public init(root: URL? = nil) {
         let defaultRoot = FileManager.default
@@ -71,6 +72,10 @@ public final class Store {
             .appendingPathComponent(FlickApp.bundleID, isDirectory: true)
         self.root = root ?? defaultRoot
         try? FileManager.default.createDirectory(at: self.root, withIntermediateDirectories: true)
+        try? FileManager.default.setAttributes(
+            [.posixPermissions: 0o700],
+            ofItemAtPath: self.root.path
+        )
     }
 
     public func loadPrefs() -> Prefs {
@@ -82,10 +87,14 @@ public final class Store {
     }
 
     public func loadUsage() -> [String: UsageEntry] {
-        load([String: UsageEntry].self, file: "usage.json") ?? [:]
+        if let usageCache { return usageCache }
+        let loaded = load([String: UsageEntry].self, file: "usage.json") ?? [:]
+        usageCache = loaded
+        return loaded
     }
 
     public func saveUsage(_ usage: [String: UsageEntry]) {
+        usageCache = usage
         save(usage, file: "usage.json")
     }
 
@@ -127,7 +136,6 @@ public final class Store {
     private func save<T: Encodable>(_ value: T, file: String) {
         let path = url(file)
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(value) else { return }
         let tmp = path.appendingPathExtension("tmp")
@@ -138,8 +146,16 @@ public final class Store {
             } else {
                 try FileManager.default.moveItem(at: tmp, to: path)
             }
+            try FileManager.default.setAttributes(
+                [.posixPermissions: 0o600],
+                ofItemAtPath: path.path
+            )
         } catch {
             try? data.write(to: path, options: .atomic)
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o600],
+                ofItemAtPath: path.path
+            )
         }
     }
 }

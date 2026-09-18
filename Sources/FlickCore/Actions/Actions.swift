@@ -101,6 +101,13 @@ public enum ActionRunner {
             return .ok
         }
         guard let path = item.path else { return .fail("Nothing to open") }
+        if item.commandID == CommandID.openFolder {
+            var isDir: ObjCBool = false
+            FileManager.default.fileExists(atPath: path, isDirectory: &isDir)
+            if !isDir.boolValue {
+                return reveal(item)
+            }
+        }
         let url = URL(fileURLWithPath: path)
         let ok = NSWorkspace.shared.open(url)
         return ok ? .ok : .fail("Couldn’t open")
@@ -116,6 +123,9 @@ public enum ActionRunner {
         if let pid = item.runningPID,
            let app = NSRunningApplication(processIdentifier: pid)
         {
+            if let bid = item.bundleIdentifier, app.bundleIdentifier != bid {
+                return .fail("No running app matches")
+            }
             let ok = force ? app.forceTerminate() : app.terminate()
             return ok ? .ok : .fail("Couldn’t \(force ? "kill" : "quit")")
         }

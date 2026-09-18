@@ -15,6 +15,7 @@ xcuserdata/
 
 # Brainstorm / local
 .superpowers/
+.agent-loops/perf-bench/
 
 # OS / editor
 .DS_Store
