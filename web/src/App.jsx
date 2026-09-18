@@ -73,9 +73,6 @@ export default function App() {
             <a href="#versus" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[var(--ink)] no-underline md:inline">
               Versus
             </a>
-            <a href="#brag" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[var(--ink)] no-underline md:inline">
-              Reel
-            </a>
             <a href="#keys" className="hidden font-mono text-[0.7rem] uppercase tracking-[0.16em] text-[var(--ink)] no-underline md:inline">
               Keys
             </a>
@@ -142,22 +139,6 @@ export default function App() {
                 </article>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section id="brag" className="border-t border-[var(--rule)] px-5 py-20 md:px-8">
-          <div className="mx-auto max-w-6xl">
-            <p className="mb-3 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-[var(--muted)]">Reel</p>
-            <h2 className="display mb-10 text-5xl font-semibold tracking-tight md:text-6xl">The brag.</h2>
-            <video
-              className="w-full border border-[var(--rule)] bg-[var(--paper)]"
-              poster={`${import.meta.env.BASE_URL}brag.jpg`}
-              controls
-              playsInline
-              preload="metadata"
-            >
-              <source src={`${import.meta.env.BASE_URL}brag.mp4`} type="video/mp4" />
-            </video>
           </div>
         </section>
 
